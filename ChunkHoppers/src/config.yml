@@ -1,0 +1,13 @@
+ItemConfig:
+  name: '&eChunkHopper'
+  lore:
+    - '&7This chunk will automatically pick up any'
+    - '&7items that spawn in its chunk'
+General:
+  materials:
+    - CACTUS
+    - SUGAR_CANE
+Messages:
+  already-placed-chunk: '&cThere is already a hopper in this chunk!'
+  placed-hopper: '&aYou placed a Chunk Hopper!'
+  destroyed-hopper: '&aYou destroyed a Chunk Hopper!'
