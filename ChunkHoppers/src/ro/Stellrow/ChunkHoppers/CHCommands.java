@@ -35,6 +35,7 @@ public class CHCommands implements CommandExecutor {
                     return true;
                 }
                 target.getInventory().addItem(i);
+                return true;
             }catch (IllegalArgumentException ex){
                 sender.sendMessage("Wrong amount!");
                 return true;

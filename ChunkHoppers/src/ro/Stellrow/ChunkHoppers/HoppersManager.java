@@ -11,14 +11,13 @@ import org.bukkit.event.entity.ItemSpawnEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.persistence.PersistentDataType;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 
 public class HoppersManager implements Listener {
     private final ChunkHoppers pl;
 
-    private HashMap<Chunk,Block> hoppers = new HashMap<>();
+    private Set<Block> hoppers = new HashSet<>();
+
 
     private List<Material> materialList = new ArrayList<>();
 
@@ -31,7 +30,7 @@ public class HoppersManager implements Listener {
     public void loadHoppers(){
         hoppers.clear();
         for(Block b : pl.getSqLiteHandler().getAllHoppers()){
-            hoppers.put(b.getChunk(),b);
+            hoppers.add(b);
         }
     }
     public void loadMaterials(){
@@ -56,7 +55,7 @@ public class HoppersManager implements Listener {
                 if(i.getItemMeta().getPersistentDataContainer().has(pl.hopperKey, PersistentDataType.STRING)){
                     if(canPlace(b.getChunk())) {
                         pl.getSqLiteHandler().addHopper(b);
-                        hoppers.put(b.getChunk(), b);
+                        hoppers.add(b);
                         setPDC(b);
                         event.getPlayer().sendMessage(ChatColor.translateAlternateColorCodes('&',pl.getConfig().getString("Messages.placed-hopper")));
                     }else{
@@ -93,8 +92,10 @@ public class HoppersManager implements Listener {
         location.getWorld().dropItemNaturally(location,pl.createItem());
     }
     private boolean canPlace(Chunk involved){
-        if(hoppers.containsKey(involved)){
-            return false;
+        for(Block b : hoppers){
+            if(b.getChunk().equals(involved)){
+                return false;
+            }
         }
         return true;
     }
@@ -105,14 +106,15 @@ public class HoppersManager implements Listener {
     @EventHandler
     public void onItemSpawn(ItemSpawnEvent event){
         if(materialList.contains(event.getEntity().getItemStack().getType())){
-            if(hoppers.containsKey(event.getLocation().getChunk())){
-                Block hopperBlock = hoppers.get(event.getLocation().getChunk());
-                Hopper hopper = (Hopper) hopperBlock.getState();
-                if(hopper.getInventory().firstEmpty()==-1){
-                    return;
+            for(Block b : hoppers) {
+                if (b.getChunk().equals(event.getLocation().getChunk())) {
+                    Hopper hopper = (Hopper) b.getState();
+                    if (hopper.getInventory().firstEmpty() == -1) {
+                        return;
+                    }
+                    hopper.getInventory().addItem(event.getEntity().getItemStack());
+                    event.setCancelled(true);
                 }
-                hopper.getInventory().addItem(event.getEntity().getItemStack());
-                event.setCancelled(true);
             }
         }
 
